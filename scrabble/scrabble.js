@@ -1,5 +1,6 @@
 let dict = await Deno.readTextFile("./dictionary.txt");
 dict = dict.split(/\n/);
+
 class Tile {
 	constructor(letter) {
 		this.letter = letter;
@@ -121,18 +122,13 @@ class Bag {
 			y: 2,
 			z: 1,
 		};
-		this.bag = [];
-	}
-	fillBag() {
-		for (let letter in this.letters) {
+		this.contents = [];
+		for (let letter of this.letters) {
 			while (this.amounts[letter] > 0) {
-				console.log(this.amounts[letter]);
-				console.log(this.amounts[letter] > 0);
-				this.bag.push(new Tile(letter));
+				this.contents.push(new Tile(letter));
 				--this.amounts[letter];
 			}
 		}
-		console.log(this.bag);
 	}
 	shuffleBag() {
 		let seed = Date.now();
@@ -140,7 +136,7 @@ class Bag {
 	}
 
 	drawTile() {
-		return this.bag.shift();
+		return this.contents.shift();
 	}
 }
 
@@ -224,7 +220,6 @@ let hello = new Word([
 // console.log(hello.validateWord());
 
 let gameBag = new Bag();
-gameBag.fillBag();
 
-// const Dominic = new Player("Dominic", new Bag());
-// Dominic.playTurn();
+const Dominic = new Player("Dominic", gameBag);
+Dominic.playTurn();
