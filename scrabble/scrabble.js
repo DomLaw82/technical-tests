@@ -131,7 +131,15 @@ class Bag {
 		}
 	}
 	shuffleBag() {
+		const maxIndex = this.contents.length;
 		let seed = Date.now();
+		for (let i = 0; i < this.contents.length; i++) {
+			let swapPoint = Math.floor((Math.random() * seed) % maxIndex);
+			let temp = this.contents[i];
+			this.contents[i] = this.contents[swapPoint];
+			this.contents[swapPoint] = temp;
+		}
+		return this.contents;
 		// work out shuffle function
 	}
 
@@ -162,10 +170,13 @@ class Player {
 		let validChoice = true;
 		while (validChoice) {
 			let choice = prompt("What word would you like to play: ");
-			for (let letter in choice) {
+			for (let letter of choice) {
 				// check player selected from letters in their rack
 				if (!playerOptions.includes(letter)) {
-					console.log("You selected a letter you don't have, try again!");
+					console.log(
+						"\n%cYou selected a letter you don't have, try again!\n",
+						"color: red; font-weight: bold"
+					);
 					validChoice = false;
 					this.playTurn();
 				}
@@ -189,8 +200,10 @@ class Player {
 				// fill player rack
 				this.fillRack();
 			} else {
-				console.log("Invalid word, try again!");
-				validChoice = false;
+				console.log(
+					"\n%cInvalid word, try again!\n",
+					"color: red; font-weight: bold"
+				);
 			}
 		}
 	}
@@ -220,6 +233,6 @@ let hello = new Word([
 // console.log(hello.validateWord());
 
 let gameBag = new Bag();
-
+gameBag.shuffleBag();
 const Dominic = new Player("Dominic", gameBag);
 Dominic.playTurn();
