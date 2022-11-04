@@ -60,7 +60,7 @@ class Word {
 				return true;
 			}
 		}
-		return false;
+		return;
 	}
 }
 
@@ -169,7 +169,9 @@ class Player {
 		console.log(playerOptions);
 		let validChoice = true;
 		while (validChoice) {
-			let choice = prompt("What word would you like to play: ");
+			let choice = prompt("What word would you like to play: ")
+				.toLowerCase()
+				.split("");
 			for (let letter of choice) {
 				// check player selected from letters in their rack
 				if (!playerOptions.includes(letter)) {
@@ -182,11 +184,15 @@ class Player {
 				}
 			}
 			// validate word choice with dict
-			let word = this.rack.filter((tile) =>
-				playerOptions.includes(tile.showLetter())
-			);
+			let word = [];
+			for (let i in choice) {
+				word.push(
+					this.rack[
+						this.rack.findIndex((tile) => tile.showLetter() === choice[i])
+					]
+				);
+			}
 			let newWord = new Word(word);
-
 			if (newWord.validateWord()) {
 				// remove letters from rack
 				console.log(
@@ -199,6 +205,7 @@ class Player {
 				this.wordsPlayed.push(choice);
 				// fill player rack
 				this.fillRack();
+				validChoice = false;
 			} else {
 				console.log(
 					"\n%cInvalid word, try again!\n",
@@ -233,6 +240,7 @@ let hello = new Word([
 // console.log(hello.validateWord());
 
 let gameBag = new Bag();
+gameBag.shuffleBag();
 gameBag.shuffleBag();
 const Dominic = new Player("Dominic", gameBag);
 Dominic.playTurn();
