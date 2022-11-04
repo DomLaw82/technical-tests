@@ -1,3 +1,4 @@
+const dict = await Deno.readTextFile("./dictionary.txt");
 class Tile {
 	constructor(letter) {
 		this.letter = letter;
@@ -36,7 +37,7 @@ class Tile {
 		return this.values[this.letter];
 	}
 
-	letter() {
+	showLetter() {
 		return this.letter;
 	}
 }
@@ -49,8 +50,12 @@ class Word {
 	wordScore() {
 		return this.tiles.reduce((total, tile) => total + tile.value(), 0);
 	}
-	wordString() {
-		return this.tiles.reduce((total, tile) => total + tile.letter(), "");
+	lettersString() {
+		return this.tiles.reduce((total, tile) => total + tile.showLetter(), "");
+	}
+
+	validateWord() {
+		for validWords
 	}
 }
 
@@ -138,7 +143,39 @@ class Player {
 		this.bag = bag;
 	}
 
-	playTurn() {}
+	showRack() {
+		return this.rack.reduce(
+			(total, tile) => total + tile.showLetter() + " ",
+			""
+		);
+	}
+
+	playTurn() {
+		playerOptions = this.showRack();
+		console.log(playerOptions);
+		validChoice = true;
+		while (validChoice) {
+			let choice = input("What word would you like to play: ");
+			for (let letter in choice) {
+				if (!playerOptions.includes(letter)) {
+					console.log("Invalid entry, try again!");
+					validChoice = false;
+				} else {
+					validChoice = true;
+				}
+			}
+		}
+		let word = this.rack.filter((tile) =>
+			playerOptions.includes(tile.showLetter())
+		);
+		let newWord = new Word(word);
+		if (newWord.validateWord()) {
+			// add word to list of words played
+			// remove letters from rack
+			// fill player rack
+			// move to next player
+		}
+	}
 
 	fillRack() {
 		while (this.rack.length < 7) {
@@ -153,3 +190,14 @@ class Game {
 		this.bag = bag;
 	}
 }
+
+// let hello = new Word([
+// 	new Tile("h"),
+// 	new Tile("e"),
+// 	new Tile("l"),
+// 	new Tile("l"),
+// 	new Tile("o"),
+// ]);
+// console.log(hello.lettersString(), hello.wordScore());
+
+console.log(dict[0]);
