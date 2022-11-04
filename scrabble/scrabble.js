@@ -193,10 +193,9 @@ class Player {
 		);
 	}
 	fillRack() {
-		let deficit = 7 - this.rack.length;
-		for (let i = 0; i < deficit; i++) this.rack.push(this.bag.drawTile());
+		while (this.rack.length < 7 && this.bag.contents.length > 0)
+			this.rack.push(this.bag.drawTile());
 	}
-
 	tilesToLetters() {
 		return this.rack.map((i) => (i = i.showLetter()));
 	}
@@ -214,7 +213,7 @@ class Player {
 		}
 		return countsList;
 	}
-	longestValidWord() {
+	longestValidWord(newWord) {
 		const rackLetterCount = this.letterCount(this.tilesToLetters(this.rack));
 		for (let i = this.rack.length; i > 2; i--) {
 			for (let word of dict) {
@@ -223,16 +222,21 @@ class Player {
 					wordLetterCount.every((letter) => rackLetterCount.includes(letter)) &&
 					word.length === i
 				) {
-					console.log(
-						`%cLongest Possible Word: ${word} - ${word.length} letters`,
-						"color: green; font-weight: bold"
-					);
+					newWord.tiles.length >= i
+						? console.log(
+								`%cYou found the longest word available`,
+								"color: green; font-weight: bold"
+						  )
+						: console.log(
+								`%cLongest Possible Word: ${word} - ${word.length} letters`,
+								"color: green; font-weight: bold"
+						  );
 					return word;
 				}
 			}
 		}
 	}
-	highestValueValidWord() {
+	highestValueValidWord(newWord) {
 		let highestValue = 0;
 		let highestValueWord = [];
 		const rackLetterCount = this.letterCount(this.tilesToLetters(this.rack));
@@ -253,13 +257,17 @@ class Player {
 				}
 			}
 		}
-		console.log(
-			`%cHighest Value Word: ${highestValueWord[0]} - ${highestValue} points\n`,
-			"color: green; font-weight: bold"
-		);
+		newWord.wordScore() >= highestValue
+			? console.log(
+					`%cYou found the highest available score\n`,
+					"color: green; font-weight: bold"
+			  )
+			: console.log(
+					`%cHighest Value Word: ${highestValueWord[0]} - ${highestValue} points\n`,
+					"color: green; font-weight: bold"
+			  );
 		return [highestValueWord, highestValue];
 	}
-
 	playTurn() {
 		this.bag.contents.length > 0 && this.rack.length < 7 ? this.fillRack() : {};
 		let playerOptions = this.showRack();
@@ -292,8 +300,8 @@ class Player {
 					`\nWord: ${newWord.lettersString()}\nScore: ${newWord.wordScore()}`
 				);
 				this.score += newWord.wordScore();
-				this.longestValidWord();
-				this.highestValueValidWord();
+				this.longestValidWord(newWord);
+				this.highestValueValidWord(newWord);
 				for (let letter of choice) {
 					let letterIndex = this.rack.findIndex(
 						(tile) => tile.showLetter() === letter
