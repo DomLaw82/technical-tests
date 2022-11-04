@@ -55,7 +55,11 @@ class Word {
 	}
 
 	validateWord() {
-		for validWords
+		for (let validWord in dict) {
+			if (this.tiles.lettersString() === validWord) {
+				return true;
+			} else return false;
+		}
 	}
 }
 
@@ -140,6 +144,7 @@ class Player {
 	constructor(name, bag) {
 		this.name = name;
 		this.rack = [];
+		this.wordsPlayed = [];
 		this.bag = bag;
 	}
 
@@ -157,23 +162,32 @@ class Player {
 		while (validChoice) {
 			let choice = input("What word would you like to play: ");
 			for (let letter in choice) {
+				// check player selected from letters in their rack
 				if (!playerOptions.includes(letter)) {
-					console.log("Invalid entry, try again!");
+					console.log("You selected a letter you don't have, try again!");
 					validChoice = false;
-				} else {
-					validChoice = true;
+					playerTurn();
 				}
 			}
-		}
-		let word = this.rack.filter((tile) =>
-			playerOptions.includes(tile.showLetter())
-		);
-		let newWord = new Word(word);
-		if (newWord.validateWord()) {
-			// add word to list of words played
-			// remove letters from rack
-			// fill player rack
-			// move to next player
+			// validate word choice with dict
+			let word = this.rack.filter((tile) =>
+				playerOptions.includes(tile.showLetter())
+			);
+			let newWord = new Word(word);
+
+			if (newWord.validateWord()) {
+				// remove letters from rack
+				this.rack = this.rack.filter(
+					(tile) => !choice.includes(tile.showLetter())
+				);
+				// add word to list of words played
+				this.wordsPlayed.push(choice);
+				// fill player rack
+				this.fillRack();
+			} else {
+				console.log("Invalid word, try again!");
+				validChoice = false;
+			}
 		}
 	}
 
@@ -191,13 +205,14 @@ class Game {
 	}
 }
 
-// let hello = new Word([
-// 	new Tile("h"),
-// 	new Tile("e"),
-// 	new Tile("l"),
-// 	new Tile("l"),
-// 	new Tile("o"),
-// ]);
-// console.log(hello.lettersString(), hello.wordScore());
+let hello = new Word([
+	new Tile("h"),
+	new Tile("e"),
+	new Tile("l"),
+	new Tile("l"),
+	new Tile("o"),
+]);
+console.log(hello.lettersString(), hello.wordScore());
+console.log(hello.validateWord());
 
 console.log(dict[0]);
