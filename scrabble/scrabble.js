@@ -1,4 +1,5 @@
-const dict = await Deno.readTextFile("./dictionary.txt");
+let dict = await Deno.readTextFile("./dictionary.txt");
+dict = dict.split(/\n/);
 class Tile {
 	constructor(letter) {
 		this.letter = letter;
@@ -46,20 +47,19 @@ class Word {
 	constructor(tiles) {
 		this.tiles = tiles;
 	}
-
 	wordScore() {
 		return this.tiles.reduce((total, tile) => total + tile.value(), 0);
 	}
 	lettersString() {
 		return this.tiles.reduce((total, tile) => total + tile.showLetter(), "");
 	}
-
 	validateWord() {
-		for (let validWord in dict) {
-			if (this.tiles.lettersString() === validWord) {
+		for (let validWord of dict) {
+			if (validWord === this.lettersString()) {
 				return true;
-			} else return false;
+			}
 		}
+		return false;
 	}
 }
 
@@ -122,14 +122,18 @@ class Bag {
 			z: 1,
 		};
 		this.bag = [];
-		for (let letter in letters) {
+	}
+	fillBag() {
+		for (let letter in this.letters) {
 			while (this.amounts[letter] > 0) {
+				console.log(this.amounts[letter]);
+				console.log(this.amounts[letter] > 0);
 				this.bag.push(new Tile(letter));
 				--this.amounts[letter];
 			}
 		}
+		console.log(this.bag);
 	}
-
 	shuffleBag() {
 		let seed = Date.now();
 		// work out shuffle function
@@ -156,17 +160,18 @@ class Player {
 	}
 
 	playTurn() {
-		playerOptions = this.showRack();
+		this.fillRack();
+		let playerOptions = this.showRack();
 		console.log(playerOptions);
-		validChoice = true;
+		let validChoice = true;
 		while (validChoice) {
-			let choice = input("What word would you like to play: ");
+			let choice = prompt("What word would you like to play: ");
 			for (let letter in choice) {
 				// check player selected from letters in their rack
 				if (!playerOptions.includes(letter)) {
 					console.log("You selected a letter you don't have, try again!");
 					validChoice = false;
-					playerTurn();
+					this.playTurn();
 				}
 			}
 			// validate word choice with dict
@@ -177,6 +182,9 @@ class Player {
 
 			if (newWord.validateWord()) {
 				// remove letters from rack
+				console.log(
+					`\nWord: ${newWord.lettersString()}\nScore: ${newWord.wordScore()}`
+				);
 				this.rack = this.rack.filter(
 					(tile) => !choice.includes(tile.showLetter())
 				);
@@ -212,7 +220,11 @@ let hello = new Word([
 	new Tile("l"),
 	new Tile("o"),
 ]);
-console.log(hello.lettersString(), hello.wordScore());
-console.log(hello.validateWord());
+// console.log(hello.lettersString(), hello.wordScore());
+// console.log(hello.validateWord());
 
-console.log(dict[0]);
+let gameBag = new Bag();
+gameBag.fillBag();
+
+// const Dominic = new Player("Dominic", new Bag());
+// Dominic.playTurn();
