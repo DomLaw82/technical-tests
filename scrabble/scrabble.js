@@ -183,18 +183,18 @@ class Player {
 		this.rack = [];
 		this.wordsPlayed = [];
 		this.bag = bag;
+		this.score = 0;
 	}
 
 	showRack() {
 		return this.rack.reduce(
-			(total, tile) => total + tile.showLetter() + " ",
-			""
+			(total, tile) => total + tile.showLetter() + ` `,
+			`${this.name}: `
 		);
 	}
 	fillRack() {
-		while (this.rack.length < 7) {
-			this.rack.push(this.bag.drawTile());
-		}
+		let deficit = 7 - this.rack.length;
+		for (let i = 0; i < deficit; i++) this.rack.push(this.bag.drawTile());
 	}
 
 	tilesToLetters() {
@@ -224,7 +224,8 @@ class Player {
 					word.length === i
 				) {
 					console.log(
-						`Longest Possible Word: ${word} - ${word.length} letters`
+						`%cLongest Possible Word: ${word} - ${word.length} letters`,
+						"color: green; font-weight: bold"
 					);
 					return word;
 				}
@@ -253,13 +254,14 @@ class Player {
 			}
 		}
 		console.log(
-			`Highest Value Word: ${highestValueWord[0]} - ${highestValue} points\n`
+			`%cHighest Value Word: ${highestValueWord[0]} - ${highestValue} points\n`,
+			"color: green; font-weight: bold"
 		);
 		return [highestValueWord, highestValue];
 	}
 
 	playTurn() {
-		this.fillRack();
+		this.bag.contents.length > 0 && this.rack.length < 7 ? this.fillRack() : {};
 		let playerOptions = this.showRack();
 		console.log(playerOptions);
 		let validChoice = true;
@@ -280,12 +282,8 @@ class Player {
 			}
 			// validate word choice with dict
 			let word = [];
-			for (let i in choice) {
-				word.push(
-					this.rack[
-						this.rack.findIndex((tile) => tile.showLetter() === choice[i])
-					]
-				);
+			for (let i of choice) {
+				word.push(this.rack.find((tile) => tile.showLetter() === i));
 			}
 			let newWord = new Word(word);
 			if (newWord.validateWord()) {
@@ -293,15 +291,17 @@ class Player {
 				console.log(
 					`\nWord: ${newWord.lettersString()}\nScore: ${newWord.wordScore()}`
 				);
+				this.score += newWord.wordScore();
 				this.longestValidWord();
 				this.highestValueValidWord();
-				this.rack = this.rack.filter(
-					(tile) => !choice.includes(tile.showLetter())
-				);
+				for (let letter of choice) {
+					let letterIndex = this.rack.findIndex(
+						(tile) => tile.showLetter() === letter
+					);
+					this.rack.splice(letterIndex, 1);
+				}
 				// add word to list of words played
 				this.wordsPlayed.push(choice);
-				// fill player rack
-				this.fillRack();
 				validChoice = false;
 			} else {
 				console.log(
@@ -318,20 +318,36 @@ class Game {
 		this.players = players;
 		this.bag = bag;
 	}
+	play() {
+		for (let player of this.players) {
+			player.playTurn();
+		}
+	}
 }
 
-let hello = new Word([
-	new Tile("h"),
-	new Tile("e"),
-	new Tile("l"),
-	new Tile("l"),
-	new Tile("o"),
-]);
-// console.log(hello.lettersString(), hello.wordScore());
-// console.log(hello.validateWord());
+function main() {
+	let playing = prompt("Would you like to play a game of Scrabble? (y/n):");
+	playing === "y" ? (playing = true) : (playing = false);
+	while (playing) {
+		let gameBag = new Bag();
+		gameBag.shuffleBag();
+		gameBag.shuffleBag();
+		const noOfPlayers = prompt("How many players?");
+		let players = [];
+		for (let i = 0; i < noOfPlayers; i++) {
+			let newPlayerName = prompt(`Player ${i + 1}'s name: `);
+			players.push(new Player(newPlayerName, gameBag));
+		}
+		const game = new Game(players, gameBag);
+		console.log("");
+		while (gameBag.contents.length > 0) {
+			game.play();
+		}
+		console.log("LAST WORDS...", "color: orange; font-weight: bold");
+		game.play();
+	}
+}
 
-let gameBag = new Bag();
-gameBag.shuffleBag();
-gameBag.shuffleBag();
-const Dominic = new Player("Dominic", gameBag);
-Dominic.playTurn();
+main();
+
+//insert check if player has joint longest word/highest value word
