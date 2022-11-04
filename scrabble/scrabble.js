@@ -29,12 +29,28 @@ class Tile {
 			y: 4,
 			z: 10,
 		};
-		this.value = value;
 		this.multiplier = 1;
 	}
 
-	letterValue() {
+	value() {
 		return this.values[this.letter];
+	}
+
+	letter() {
+		return this.letter;
+	}
+}
+
+class Word {
+	constructor(tiles) {
+		this.tiles = tiles;
+	}
+
+	wordScore() {
+		return this.tiles.reduce((total, tile) => total + tile.value(), 0);
+	}
+	wordString() {
+		return this.tiles.reduce((total, tile) => total + tile.letter(), "");
 	}
 }
 
@@ -105,8 +121,35 @@ class Bag {
 		}
 	}
 
-	shuffleBag(bag) {
+	shuffleBag() {
 		let seed = Date.now();
 		// work out shuffle function
+	}
+
+	drawTile() {
+		return this.bag.shift();
+	}
+}
+
+class Player {
+	constructor(name, bag) {
+		this.name = name;
+		this.rack = [];
+		this.bag = bag;
+	}
+
+	playTurn() {}
+
+	fillRack() {
+		while (this.rack.length < 7) {
+			this.rack.push(this.bag.drawTile());
+		}
+	}
+}
+
+class Game {
+	constructor(players, bag) {
+		this.players = players;
+		this.bag = bag;
 	}
 }
