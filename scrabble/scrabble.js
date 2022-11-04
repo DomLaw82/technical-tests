@@ -1,6 +1,35 @@
 let dict = await Deno.readTextFile("./dictionary.txt");
 dict = dict.split(/\n/);
 
+const tileValues = {
+	a: 1,
+	b: 3,
+	c: 3,
+	d: 2,
+	e: 1,
+	f: 4,
+	g: 2,
+	h: 4,
+	i: 1,
+	j: 8,
+	k: 5,
+	l: 1,
+	m: 3,
+	n: 1,
+	o: 1,
+	p: 3,
+	q: 10,
+	r: 1,
+	s: 1,
+	t: 1,
+	u: 1,
+	v: 4,
+	w: 4,
+	x: 8,
+	y: 4,
+	z: 10,
+};
+
 class Tile {
 	constructor(letter) {
 		this.letter = letter;
@@ -194,12 +223,41 @@ class Player {
 					wordLetterCount.every((letter) => rackLetterCount.includes(letter)) &&
 					word.length === i
 				) {
-					console.log(`Longest Possible Word: ${word}\n`);
+					console.log(
+						`Longest Possible Word: ${word} - ${word.length} letters`
+					);
 					return word;
 				}
 			}
 		}
 	}
+	highestValueValidWord() {
+		let highestValue = 0;
+		let highestValueWord = [];
+		const rackLetterCount = this.letterCount(this.tilesToLetters(this.rack));
+		for (let i = this.rack.length; i > 2; i--) {
+			for (let word of dict) {
+				let wordLetterCount = this.letterCount(word.split(""));
+				if (
+					wordLetterCount.every((letter) => rackLetterCount.includes(letter))
+				) {
+					let wordValue = word
+						.split("")
+						.reduce((total, letter) => total + tileValues[letter], 0);
+					if (wordValue > highestValue) {
+						highestValue = wordValue;
+						highestValueWord.pop();
+						highestValueWord.push(word);
+					}
+				}
+			}
+		}
+		console.log(
+			`Highest Value Word: ${highestValueWord[0]} - ${highestValue} points\n`
+		);
+		return [highestValueWord, highestValue];
+	}
+
 	playTurn() {
 		this.fillRack();
 		let playerOptions = this.showRack();
@@ -236,6 +294,7 @@ class Player {
 					`\nWord: ${newWord.lettersString()}\nScore: ${newWord.wordScore()}`
 				);
 				this.longestValidWord();
+				this.highestValueValidWord();
 				this.rack = this.rack.filter(
 					(tile) => !choice.includes(tile.showLetter())
 				);
