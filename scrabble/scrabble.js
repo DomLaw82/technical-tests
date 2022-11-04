@@ -162,7 +162,44 @@ class Player {
 			""
 		);
 	}
+	fillRack() {
+		while (this.rack.length < 7) {
+			this.rack.push(this.bag.drawTile());
+		}
+	}
 
+	tilesToLetters() {
+		return this.rack.map((i) => (i = i.showLetter()));
+	}
+	letterCount(letters) {
+		let lettersSet = Array.from(new Set(letters)).sort();
+		let countsList = [];
+		for (let i of lettersSet) {
+			let count = 0;
+			for (let j of letters) {
+				if (i === j) {
+					++count;
+				}
+			}
+			count > 1 ? countsList.push((i = `${i}${count}`)) : countsList.push(i);
+		}
+		return countsList;
+	}
+	longestValidWord() {
+		const rackLetterCount = this.letterCount(this.tilesToLetters(this.rack));
+		for (let i = this.rack.length; i > 2; i--) {
+			for (let word of dict) {
+				let wordLetterCount = this.letterCount(word.split(""));
+				if (
+					wordLetterCount.every((letter) => rackLetterCount.includes(letter)) &&
+					word.length === i
+				) {
+					console.log(`Longest Possible Word: ${word}\n`);
+					return word;
+				}
+			}
+		}
+	}
 	playTurn() {
 		this.fillRack();
 		let playerOptions = this.showRack();
@@ -198,6 +235,7 @@ class Player {
 				console.log(
 					`\nWord: ${newWord.lettersString()}\nScore: ${newWord.wordScore()}`
 				);
+				this.longestValidWord();
 				this.rack = this.rack.filter(
 					(tile) => !choice.includes(tile.showLetter())
 				);
@@ -212,12 +250,6 @@ class Player {
 					"color: red; font-weight: bold"
 				);
 			}
-		}
-	}
-
-	fillRack() {
-		while (this.rack.length < 7) {
-			this.rack.push(this.bag.drawTile());
 		}
 	}
 }
