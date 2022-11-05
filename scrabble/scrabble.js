@@ -215,7 +215,7 @@ class Player {
 	}
 	longestValidWord(newWord) {
 		const rackLetterCount = this.letterCount(this.tilesToLetters(this.rack));
-		for (let i = this.rack.length; i > 2; i--) {
+		for (let i = this.rack.length; i > 1; i--) {
 			for (let word of dict) {
 				let wordLetterCount = this.letterCount(word.split(""));
 				if (
@@ -273,19 +273,17 @@ class Player {
 		let playerOptions = this.showRack();
 		console.log(playerOptions);
 		let validChoice = true;
-		while (validChoice) {
+		try {
 			let choice = prompt("What word would you like to play: ")
 				.toLowerCase()
 				.split("");
 			for (let letter of choice) {
 				// check player selected from letters in their rack
 				if (!playerOptions.includes(letter)) {
-					console.log(
-						"\n%cYou selected a letter you don't have, try again!\n",
-						"color: red; font-weight: bold"
-					);
-					validChoice = false;
-					this.playTurn();
+					throw new Error("You selected a letter you don't have, try again!\n");
+					// find a way to break out of the for loop from here
+					// break causes error and recursion also
+					// try-catch?
 				}
 			}
 			// validate word choice with dict
@@ -312,11 +310,10 @@ class Player {
 				this.wordsPlayed.push(choice);
 				validChoice = false;
 			} else {
-				console.log(
-					"\n%cInvalid word, try again!\n",
-					"color: red; font-weight: bold"
-				);
+				throw new Error("Invalid word, try again!\n");
 			}
+		} catch (error) {
+			console.log(`\n%c${error.toString()}`, "color: red; font-weight: bold");
 		}
 	}
 }
