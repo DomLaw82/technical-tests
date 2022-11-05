@@ -268,19 +268,48 @@ class Player {
 			  );
 		return [highestValueWord, highestValue];
 	}
+
+	removeFromRack(selection) {
+		let removed = [];
+		for (let letter of selection) {
+			let letterIndex = this.rack.findIndex(
+				(tile) => tile.showLetter() === letter
+			);
+			removed.push(this.rack.splice(letterIndex, 1));
+		}
+		return removed;
+	}
+
+	swapLetters() {
+		let playerRack = this.showRack();
+		console.log(`\n%c${playerRack}`, "color: green; font-weight: bold");
+		let swaps = prompt("Which letters would you like to swap?: ");
+		console.log();
+		let removed = this.removeFromRack(swaps);
+		this.bag.contents = this.bag.contents.concat(removed);
+		this.bag.shuffleBag();
+		console.log(this.bag.contents.length);
+	}
+
 	playTurn() {
+		let choice;
 		this.bag.contents.length > 0 && this.rack.length < 7 ? this.fillRack() : {};
 		let playerOptions = this.showRack();
 		console.log(playerOptions);
-		let validChoice = true;
 		try {
-			let choice = prompt("What word would you like to play: ")
+			choice = prompt(
+				"What word would you like to play ('sl' to swap letters): "
+			)
 				.toLowerCase()
 				.split("");
+			if (choice.join("") === "sl") {
+				console.log(this.bag.contents.length);
+				this.swapLetters();
+			}
 			for (let letter of choice) {
 				// check player selected from letters in their rack
 				if (!playerOptions.includes(letter)) {
-					throw new Error("You selected a letter you don't have, try again!\n");
+					throw new Error("You selected a letter you don't have, try again!");
 					// find a way to break out of the for loop from here
 					// break causes error and recursion also
 					// try-catch?
@@ -300,20 +329,18 @@ class Player {
 				this.score += newWord.wordScore();
 				this.longestValidWord(newWord);
 				this.highestValueValidWord(newWord);
-				for (let letter of choice) {
-					let letterIndex = this.rack.findIndex(
-						(tile) => tile.showLetter() === letter
-					);
-					this.rack.splice(letterIndex, 1);
-				}
+				this.removeFromRack(choice);
 				// add word to list of words played
 				this.wordsPlayed.push(choice);
-				validChoice = false;
 			} else {
-				throw new Error("Invalid word, try again!\n");
+				throw new Error("Invalid word, try again!");
 			}
 		} catch (error) {
-			console.log(`\n%c${error.toString()}`, "color: red; font-weight: bold");
+			if (choice.join("") !== "sl")
+				console.log(
+					`\n%c${error.toString()}\n`,
+					"color: red; font-weight: bold"
+				);
 		}
 	}
 }
