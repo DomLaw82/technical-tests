@@ -29,7 +29,6 @@ const tileValues = {
 	y: 4,
 	z: 10,
 };
-
 class Tile {
 	constructor(letter) {
 		this.letter = letter;
@@ -72,7 +71,6 @@ class Tile {
 		return this.letter;
 	}
 }
-
 class Word {
 	constructor(tiles) {
 		this.tiles = tiles;
@@ -92,7 +90,6 @@ class Word {
 		return;
 	}
 }
-
 class Bag {
 	constructor() {
 		this.letters = [
@@ -176,7 +173,6 @@ class Bag {
 		return this.contents.shift();
 	}
 }
-
 class Player {
 	constructor(name, bag) {
 		this.name = name;
@@ -187,17 +183,19 @@ class Player {
 	}
 
 	showRack() {
+		// occasional error saying tile.show.letter() not a function
+		// tiles not being passed to this.rack correctly
 		return this.rack.reduce(
 			(total, tile) => total + tile.showLetter() + ` `,
 			`${this.name}: `
 		);
 	}
+	tilesToLetters() {
+		return this.rack.map((i) => (i = i.showLetter()));
+	}
 	fillRack() {
 		while (this.rack.length < 7 && this.bag.contents.length > 0)
 			this.rack.push(this.bag.drawTile());
-	}
-	tilesToLetters() {
-		return this.rack.map((i) => (i = i.showLetter()));
 	}
 	letterCount(letters) {
 		let lettersSet = Array.from(new Set(letters)).sort();
@@ -268,7 +266,6 @@ class Player {
 			  );
 		return [highestValueWord, highestValue];
 	}
-
 	removeFromRack(selection) {
 		let removed = [];
 		for (let letter of selection) {
@@ -279,7 +276,6 @@ class Player {
 		}
 		return removed;
 	}
-
 	swapLetters() {
 		let playerRack = this.showRack();
 		console.log(`\n%c${playerRack}`, "color: green; font-weight: bold");
@@ -288,23 +284,23 @@ class Player {
 		let removed = this.removeFromRack(swaps);
 		this.bag.contents = this.bag.contents.concat(removed);
 		this.bag.shuffleBag();
-		console.log(this.bag.contents.length);
 	}
-
 	playTurn() {
 		let choice;
-		this.bag.contents.length > 0 && this.rack.length < 7 ? this.fillRack() : {};
+		console.log(this.bag.contents.length);
+		if (this.bag.contents.length > 0 && this.rack.length < 7) this.fillRack();
 		let playerOptions = this.showRack();
 		console.log(playerOptions);
 		try {
 			choice = prompt(
-				"What word would you like to play ('sl' to swap letters): "
+				"What word would you like to play ('sl'/'sk' to swap letters/skip turn): "
 			)
 				.toLowerCase()
 				.split("");
 			if (choice.join("") === "sl") {
-				console.log(this.bag.contents.length);
 				this.swapLetters();
+			} else if (choice.join("") === "sk") {
+				throw new Error("Skipping turn...");
 			}
 			for (let letter of choice) {
 				// check player selected from letters in their rack
@@ -317,6 +313,8 @@ class Player {
 			}
 			// validate word choice with dict
 			let word = [];
+			// new method to filter the correct letters for the validation needed
+			// currently changes the length of bag contents even if word is invalid
 			for (let i of choice) {
 				word.push(this.rack.find((tile) => tile.showLetter() === i));
 			}
@@ -336,7 +334,8 @@ class Player {
 				throw new Error("Invalid word, try again!");
 			}
 		} catch (error) {
-			if (choice.join("") !== "sl")
+			// skip turn from choice type 'skip'
+			if (choice.join("") !== "sl" && choice.join("") !== "sk")
 				console.log(
 					`\n%c${error.toString()}\n`,
 					"color: red; font-weight: bold"
@@ -344,7 +343,6 @@ class Player {
 		}
 	}
 }
-
 class Game {
 	constructor(players, bag) {
 		this.players = players;
@@ -355,9 +353,12 @@ class Game {
 			player.playTurn();
 		}
 	}
+	calculateWinner() {}
 }
-
 function main() {
+	console.log();
+	console.log("Welcome to SCRABBLE");
+	console.log();
 	let playing = prompt("Would you like to play a game of Scrabble? (y/n):");
 	playing === "y" ? (playing = true) : (playing = false);
 	while (playing) {
@@ -375,11 +376,14 @@ function main() {
 		while (gameBag.contents.length > 0) {
 			game.play();
 		}
-		console.log("LAST WORDS...", "color: orange; font-weight: bold");
+		console.log("%cLAST WORDS...", "color: orange; font-weight: bold");
 		game.play();
+		game.calculateWinner();
 	}
 }
-
 main();
 
-//insert check if player has joint longest word/highest value word
+// Potential board class
+// Visual representation after every turn with played letters
+// Squares with multipliers applied to tiles
+// Tabletop scrabble board or random - choice given to player
