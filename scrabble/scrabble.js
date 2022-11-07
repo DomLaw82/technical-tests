@@ -184,7 +184,9 @@ class Player {
 
 	showRack() {
 		// occasional error saying tile.show.letter() not a function
-		// tiles not being passed to this.rack correctly
+		// tiles not being passed to this.rack correctly at the start
+		// of player turn
+		// seemingly randomly, happens sometimes, doesn't other times
 		return this.rack.reduce(
 			(total, tile) => total + tile.showLetter() + ` `,
 			`${this.name}: `
@@ -300,6 +302,7 @@ class Player {
 			if (choice.join("") === "sl") {
 				this.swapLetters();
 			} else if (choice.join("") === "sk") {
+				console.log();
 				throw new Error("Skipping turn...");
 			}
 			for (let letter of choice) {
@@ -353,8 +356,34 @@ class Game {
 			player.playTurn();
 		}
 	}
-	calculateWinner() {}
+	calculateWinner() {
+		const max = this.players.reduce((max, next) =>
+			max > next.score ? max : next.score
+		);
+		const winner = [max];
+		for (let player of this.players) {
+			if (player.score === max.score) {
+				winner.push(player);
+			}
+		}
+		console.log(
+			`%cWith a score of ${max.score}, the winner${
+				winner.length > 1 ? "s are" : " is"
+			}...`,
+			"color: green; font-weight: bold"
+		);
+		if (winner.length === 1) {
+			console.log(`🎉${max.name}🎉`);
+		} else {
+			for (let player in winner) console.log(`🎉${player.name}🎉`);
+		}
+	}
+	playAgain() {
+		let playing = prompt("Would you like to play again? (y/n):");
+		return playing === "y" ? (playing = true) : (playing = false);
+	}
 }
+
 function main() {
 	console.log();
 	console.log("Welcome to SCRABBLE");
@@ -377,8 +406,10 @@ function main() {
 			game.play();
 		}
 		console.log("%cLAST WORDS...", "color: orange; font-weight: bold");
+		console.log();
 		game.play();
 		game.calculateWinner();
+		playing = game.playAgain();
 	}
 }
 main();
